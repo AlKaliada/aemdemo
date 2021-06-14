@@ -16,7 +16,7 @@ import java.util.List;
        resourceType = ByLineModel.RESOURCE_TYPE,
        defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class ByLineModel {
-    protected static final String RESOURCE_TYPE = "aemkaliada/components/byline";
+    protected static final String RESOURCE_TYPE = "aemdemo/components/byline";
 
     @ValueMapValue
     private String name;

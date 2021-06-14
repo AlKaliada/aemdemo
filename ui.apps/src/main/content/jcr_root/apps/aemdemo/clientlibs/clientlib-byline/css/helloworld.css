@@ -1,0 +1,23 @@
+.cmp-byline .cmp-byline__image {
+    float: left;
+}
+.cmp-byline .cmp-byline__image .cmp-image__image {
+    width: 60px;
+    height: 60px;
+    border-radius: 30px;
+    object-fit: cover;
+}
+.cmp-byline .cmp-byline__name {
+    font-size: medium;
+    font-family: serif;
+    padding-top: 0.5rem;
+    margin-left: 85px;
+    margin-bottom: 0.25rem;
+    margin-top: 0rem;
+}
+.cmp-byline .cmp-byline__occupations {
+    color: grey;
+    font-size: x-small;
+    margin-left: 85px;
+    text-transform: uppercase;
+}
