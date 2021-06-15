@@ -1,0 +1,16 @@
+<div data-sly-use.books="com.exadel.kaliada.core.models.AuthorBooksModel">
+    <h1>${books.authorName} books:</h1>
+    ===== Multifield with single field =====
+    <div data-sly-list.item="${books.authorBooks}">
+        -----Book : ${itemList.count}-----
+        <p> Book : <b>${item}</b></p>
+    </div>
+    <p>All books : <b>${books.authorBooks @ join=', '}</b></p>
+    ===== Using map =====
+    <div data-sly-list.item="${books.bookDetailsWithMap}">
+        -----Book : ${itemList.count}-----
+        <p> Book : <b>${item.bookName}</b></p>
+        <p> Subject : <b>${item.bookSubject}</b></p>
+        <p> Publish : <b>${item.publishYear}</b></p>
+    </div>
+</div>
