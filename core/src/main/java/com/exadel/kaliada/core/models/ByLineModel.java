@@ -8,6 +8,8 @@ import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import java.util.Collections;
@@ -18,6 +20,7 @@ import java.util.List;
        defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class ByLineModel {
     protected static final String RESOURCE_TYPE = "aemdemo/components/byline";
+    private static final Logger logger = LoggerFactory.getLogger(ByLineModel.class);
 
     @ValueMapValue
     private String name;
@@ -60,6 +63,6 @@ public class ByLineModel {
 
     @PostConstruct
     private void init(){
-        System.out.println("Hello");
+        logger.info("init ByLineModel");
     }
 }
