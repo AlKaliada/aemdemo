@@ -1,0 +1,35 @@
+.like_div{
+    font-size: 50px;
+    color: grey;
+    display: inline-block;
+}
+
+.like_button, .dislike_button{
+    width: 50px;
+    height: 50px;
+    background-image: url(/content/dam/aemdemo/like.jpg);
+    background-size: cover;
+    border: none;
+    border-radius: 60%;
+    display: inline;
+}
+
+.dislike_button{
+    background-image: url(/content/dam/aemdemo/dislike.jpg);
+}
+
+.like_button:hover{
+    background-image: url(/content/dam/aemdemo/likeApprove.jpg);
+}
+
+.dislike_button:hover{
+    background-image: url(/content/dam/aemdemo/dislikeApprove.jpg);
+}
+
+.like_clicked{
+    background-image: url(/content/dam/aemdemo/likeApprove.jpg);
+}
+
+.dislike_clicked{
+    background-image: url(/content/dam/aemdemo/dislikeApprove.jpg);
+}
