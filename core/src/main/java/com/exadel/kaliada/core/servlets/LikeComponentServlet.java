@@ -47,7 +47,7 @@ public class LikeComponentServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(LikeComponentServlet.class);
-    private static final String NODE_NAME = "/content/aemdemo/us/en/component-basics/jcr:content/root/container/container/like";
+    private static final String NODE_NAME = "/content/aemdemo/us/en/harvard/jcr:content/root/container/like";
     private static final long START_COUNT = 0;
 
     @Override
