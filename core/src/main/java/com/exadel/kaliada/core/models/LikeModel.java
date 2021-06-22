@@ -7,24 +7,22 @@ import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
 @Model(adaptables = SlingHttpServletRequest.class,
-        resourceType = LikeModel.RESOURCE_TYPE,
         defaultInjectionStrategy = DefaultInjectionStrategy.REQUIRED)
 public class LikeModel {
-    protected static final String RESOURCE_TYPE = "aemdemo/components/like";
 
     @ValueMapValue
     @Default(intValues = 0)
-    private Long likeCounter;
+    private long likeCounter;
 
     @ValueMapValue
     @Default(intValues = 0)
-    private Long dislikeCounter;
+    private long dislikeCounter;
 
-    public Long getLikeCounter(){
+    public long getLikeCounter() {
         return likeCounter;
     }
 
-    public Long getDislikeCounter(){
+    public long getDislikeCounter() {
         return dislikeCounter;
     }
 }

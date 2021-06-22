@@ -10,9 +10,6 @@ import java.util.Iterator;
 @Component(service = DemoService.class)
 public class DemoServiceImpl implements DemoService {
 
-    @OSGiService
-    private DemoService demoService;
-
     @Override
     public Iterator<Page> getPages() {
         return null;

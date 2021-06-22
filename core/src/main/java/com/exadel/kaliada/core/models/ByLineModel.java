@@ -20,7 +20,7 @@ import java.util.List;
        defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class ByLineModel {
     protected static final String RESOURCE_TYPE = "aemdemo/components/byline";
-    private static final Logger logger = LoggerFactory.getLogger(ByLineModel.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ByLineModel.class);
 
     @ValueMapValue
     private String name;
@@ -35,7 +35,7 @@ public class ByLineModel {
         return name;
     }
 
-    public List<String> getOccupations(){
+    public List<String> getOccupations() {
         if (occupations != null){
             Collections.sort(occupations);
             return occupations;
@@ -44,7 +44,7 @@ public class ByLineModel {
         }
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         Image image = getImage();
         if (StringUtils.isBlank(name)){
             return true;
@@ -63,6 +63,6 @@ public class ByLineModel {
 
     @PostConstruct
     private void init(){
-        logger.info("init ByLineModel");
+        LOGGER.info("init ByLineModel");
     }
 }
