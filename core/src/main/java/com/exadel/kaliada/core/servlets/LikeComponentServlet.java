@@ -15,55 +15,108 @@
  */
 package com.exadel.kaliada.core.servlets;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.servlets.annotations.SlingServletPaths;
 import org.osgi.service.component.annotations.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Servlet that writes some sample content into the response. It is mounted for
- * all resources of a specific Sling resource type. The
- * {@link SlingSafeMethodsServlet} shall be used for HTTP methods that are
- * idempotent. For write operations use the {@link SlingAllMethodsServlet}.
+ * Servlet to increment/decrement likes/dislikes values in Like component
+ * @author akaliada
  */
+
+@Slf4j
 @Component(service = Servlet.class)
 @SlingServletPaths(value = "/bin/like")
 public class LikeComponentServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = 1L;
-    private static final Logger LOGGER = LoggerFactory.getLogger(LikeComponentServlet.class);
-    private static final String RESOURCE_NAME = "/content/aemdemo/us/en/harvard/jcr:content/root/container/like";
+    private static final String LIKE_COMPONENT_PATH = "/jcr:content/root/container/like";
+    private static final String URL_PARAMETER = "url";
+    private String resourceName;
+    private String propertyName;
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
         super.doGet(request, response);
     }
 
+    /**
+     * increment/decrement likes/dislikes values in Like component in two locales (ru and en)
+     * @param req
+     * @param resp
+     * @throws ServletException
+     * @throws IOException
+     */
+
     @Override
     protected void doPost(final SlingHttpServletRequest req,
             final SlingHttpServletResponse resp) throws ServletException, IOException {
         ResourceResolver resourceResolver = req.getResourceResolver();
-        Resource resource = resourceResolver.getResource(RESOURCE_NAME);
-        ModifiableValueMap valueMap = resource.adaptTo(ModifiableValueMap.class);
-        String propertyName = req.getParameterNames().nextElement();
-        long likes = valueMap.get(propertyName, 0);
-        likes = changeLikeValue(likes, req.getParameter(propertyName));
-        valueMap.put(propertyName, likes);
+        req.getParameterNames().asIterator().forEachRemaining(parameter->{
+            if (parameter.equals(URL_PARAMETER)) {
+                resourceName = getResourceName(req.getParameter(URL_PARAMETER));
+            } else {
+                propertyName = parameter;
+            }
+        });
+        Resource resource = resourceResolver.getResource(resourceName);
+        long likes = changeLikes(resource, req);
+        String secondPageResource = resourceName.contains("/en/")
+                ? resourceName.replace("/en/", "/ru/")
+                : resourceName.replace("/ru/", "/en/");
+        resource = resourceResolver.getResource(secondPageResource);
+        changeLikes(resource, req);
         resourceResolver.commit();
         resp.setContentType("text/html");
         resp.getWriter().write(String.valueOf(likes));
     }
+
+    /**
+     * get likes/dislikes value if exists or set 0, and than set new value
+     * @param resource
+     * @param req
+     * @return - new value of like/dislike
+     */
+
+    private long changeLikes(Resource resource, SlingHttpServletRequest req) {
+        ModifiableValueMap valueMap = resource.adaptTo(ModifiableValueMap.class);
+        long likes = valueMap.get(propertyName, 0);
+        likes = changeLikeValue(likes, req.getParameter(propertyName));
+        valueMap.put(propertyName, likes);
+        return likes;
+    }
+
+    /**
+     * get resource (page) path in repo from url of the page from which request came
+     * @param url - url of the page from which request came
+     * @return - resource (page) path in repo
+     */
+
+    private String getResourceName(String url) {
+        Pattern pattern = Pattern.compile("(\\/content.+)\\.html");
+        Matcher matcher = pattern.matcher(url);
+        matcher.find();
+        return String.join("", matcher.group(1), LIKE_COMPONENT_PATH);
+    }
+
+    /**
+     * increment/decrement likes/dislikes values
+     * @param value - current like/dislike value
+     * @param action - increment/decrement
+     * @return - new value of like/dislike
+     */
 
     private long changeLikeValue(long value, String action) {
         return  action.equals("decrement") ? --value : ++value;
