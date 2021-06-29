@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        cq:lastModified="{Date}2021-06-21T21:34:11.133+03:00"
+        cq:lastModifiedBy="admin"
+        cq:tags="[]"
+        cq:template="/conf/aemdemo/settings/wcm/templates/xf-web-variation"
+        cq:xfMasterVariation="{Boolean}true"
+        cq:xfVariantType="web"
+        jcr:primaryType="cq:PageContent"
+        jcr:title="Harvard footer"
+        sling:resourceType="aemdemo/components/xfpage">
+        <root
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="aemdemo/components/container"
+            layout="responsiveGrid">
+            <separator
+                jcr:created="{Date}2021-06-21T17:00:28.088+03:00"
+                jcr:createdBy="admin"
+                jcr:lastModified="{Date}2021-06-21T17:00:28.088+03:00"
+                jcr:lastModifiedBy="admin"
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="aemdemo/components/separator"/>
+            <tagcloud
+                jcr:created="{Date}2021-06-21T19:17:58.057+03:00"
+                jcr:createdBy="admin"
+                jcr:lastModified="{Date}2021-06-21T19:17:58.057+03:00"
+                jcr:lastModifiedBy="admin"
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="cq/tagging/components/tagcloud"/>
+            <image_817998965
+                jcr:created="{Date}2021-06-21T17:00:44.998+03:00"
+                jcr:createdBy="admin"
+                jcr:lastModified="{Date}2021-06-21T17:00:44.998+03:00"
+                jcr:lastModifiedBy="admin"
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="aemdemo/components/image"
+                fileReference="/content/dam/aemdemo/1280px-Harvard_University_logo.svg.png"/>
+            <text
+                jcr:created="{Date}2021-06-21T21:29:28.364+03:00"
+                jcr:createdBy="admin"
+                jcr:lastModified="{Date}2021-06-21T21:34:11.101+03:00"
+                jcr:lastModifiedBy="admin"
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="aemdemo/components/text"
+                text="&lt;p>All right reserved, 2021&lt;/p>&#xa;"
+                textIsRich="true"/>
+        </root>
+    </jcr:content>
+</jcr:root>

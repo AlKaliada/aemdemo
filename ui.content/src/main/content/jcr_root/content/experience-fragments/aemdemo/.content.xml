@@ -5,4 +5,6 @@
     jcr:primaryType="sling:OrderedFolder"
     jcr:title="aem demo Fragments">
     <us/>
+    <header/>
+    <harvard-footer/>
 </jcr:root>

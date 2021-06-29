@@ -9,7 +9,7 @@ likeButton.onclick = function() {
         $.ajax({
             url : '/bin/like',
             method : 'POST',
-            data: {'likeCounter':'decrement'},
+            data: {'likeCounter':'decrement', 'url':document.documentURI},
             success: function (msg){
                 console.log(msg);
                 document.getElementById('like_value').innerHTML = msg;
@@ -22,7 +22,7 @@ likeButton.onclick = function() {
             $.ajax({
                 url : '/bin/like',
                 method : 'POST',
-                data: {'dislikeCounter':'decrement'},
+                data: {'dislikeCounter':'decrement', 'url':document.documentURI},
                 success: function (msg){
                     console.log(msg);
                     document.getElementById('dislike_value').innerHTML = msg;
@@ -34,7 +34,7 @@ likeButton.onclick = function() {
         $.ajax({
             url : '/bin/like',
             method : 'POST',
-            data: {'likeCounter':'increment'},
+            data: {'likeCounter':'increment', 'url':document.documentURI},
             success: function (msg){
                 console.log(msg);
                 document.getElementById('like_value').innerHTML = msg;
@@ -49,7 +49,7 @@ dislikeButton.onclick = function () {
         $.ajax({
             url : '/bin/like',
             method : 'POST',
-            data: {'dislikeCounter':'decrement'},
+            data: {'dislikeCounter':'decrement', 'url':document.documentURI},
             success: function (msg){
                 console.log(msg);
                 document.getElementById('dislike_value').innerHTML = msg;
@@ -62,7 +62,7 @@ dislikeButton.onclick = function () {
             $.ajax({
                 url : '/bin/like',
                 method : 'POST',
-                data: {'likeCounter':'decrement'},
+                data: {'likeCounter':'decrement', 'url':document.documentURI},
                 success: function (msg){
                     console.log(msg);
                     document.getElementById('like_value').innerHTML = msg;
@@ -74,7 +74,7 @@ dislikeButton.onclick = function () {
         $.ajax({
             url : '/bin/like',
             method : 'POST',
-            data: {'dislikeCounter':'increment'},
+            data: {'dislikeCounter':'increment', 'url':document.documentURI},
             success: function (msg){
                 console.log(msg);
                 document.getElementById('dislike_value').innerHTML = msg;
