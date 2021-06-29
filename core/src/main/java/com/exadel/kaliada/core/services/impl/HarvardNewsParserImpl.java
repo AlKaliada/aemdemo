@@ -23,36 +23,30 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Class to load news from https://news.harvard.edu/gazette/ and parse them
- * @author akaliada
- */
-
 @Slf4j
-@Component(service = HarvardNewsParserImpl.class)
+@Component(service = HarvardNewsParser.class)
 public class HarvardNewsParserImpl implements HarvardNewsParser {
 
     private static final String TITLE_PATH = "/jcr:content/root/container/title?jcr:title";
     private static final String TEXT_PATH = "/jcr:content/root/container/text?text";
     private static final String ASSET_PATH = "/content/dam/aemdemo";
     private static final String DEFAULT_IMAGE_PATH = "/content/dam/aemdemo/harvard-university-free-online-courses.jpg";
+    private static final String USER_AGENT = "Chrome/4.0.249.0 Safari/532.5";
+    private static final String REFERRER = "https://www.google.com";
+    public static final String TEXT_PATH_IS_REACH_PROPERTY = "/jcr:content/root/container/text?textIsRich";
     public static final String IMAGE_PATH = "/jcr:content/root/container/image?fileReference";
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
-    /**
-     * load and parse all news from the main web-site
-     * @return Map of pairs news Id and news link
-     */
-
     @Override
     public Map<String, String> getAllNews() {
         try {
+            log.info("Start loading news");
             Map<String, String> newsIdToLink = new HashMap<>();
             Document document = Jsoup.connect("https://news.harvard.edu/gazette/")
-                    .userAgent("Chrome/4.0.249.0 Safari/532.5")
-                    .referrer("https://www.google.com")
+                    .userAgent(USER_AGENT)
+                    .referrer(REFERRER)
                     .get();
             Elements news = document.select("article[id]");
             for (Element element : news) {
@@ -70,18 +64,12 @@ public class HarvardNewsParserImpl implements HarvardNewsParser {
         return Collections.emptyMap();
     }
 
-    /**
-     * load and parse single news by link
-     * @param link - link to single news
-     * @return Map with pairs components of news page (tag, image, title, text) and their values
-     */
-
     @Override
     public Map<String, String> parseSingleNews(String link) {
         try {
             Document document = Jsoup.connect(link)
-                    .userAgent("Chrome/4.0.249.0 Safari/532.5")
-                    .referrer("https://www.google.com")
+                    .userAgent(USER_AGENT)
+                    .referrer(REFERRER)
                     .get();
 
             String tag = document.selectFirst("a.article-titles__cat-link").text();
@@ -95,6 +83,7 @@ public class HarvardNewsParserImpl implements HarvardNewsParser {
             resourceToValue.put(IMAGE_PATH, uploadImageToAssets(image));
             resourceToValue.put(TITLE_PATH, title);
             resourceToValue.put(TEXT_PATH, text);
+            resourceToValue.put(TEXT_PATH_IS_REACH_PROPERTY, "true");
             return resourceToValue;
         } catch (IOException e) {
             log.error("cannot parse news {}", link, e);

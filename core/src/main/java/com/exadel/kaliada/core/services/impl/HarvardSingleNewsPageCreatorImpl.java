@@ -20,11 +20,6 @@ import org.osgi.service.component.annotations.Reference;
 import java.util.Map;
 import java.util.stream.StreamSupport;
 
-/**
- * Create two pages in en and ru locales
- * @author akaliada
- */
-
 @Slf4j
 @Component(service = HarvardSingleNewsPageCreator.class)
 public class HarvardSingleNewsPageCreatorImpl implements HarvardSingleNewsPageCreator {
@@ -41,17 +36,11 @@ public class HarvardSingleNewsPageCreatorImpl implements HarvardSingleNewsPageCr
     private ResourceResolverFactory resourceResolverFactory;
 
     @Reference
-    TranslationManager translationManager;
-
-    /**
-     * create two pages in en and ru locales
-     * @param pageName - name of new page
-     * @param pagePropertyToValue - pairs components of news page (tag, image, title, text) and their values
-     */
+    private TranslationManager translationManager;
 
     @Override
     public void createPage(String pageName, Map<String, String> pagePropertyToValue) {
-        log.info("start creating page");
+        log.info("start creating page {}", pageName);
         try (ResourceResolver resourceResolver = ResourceResolverUtil.getResourceResolver(resourceResolverFactory)) {
             PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
             Page page = pageManager.create(PAGE_PATH, pageName, PAGE_TEMPLATE, pagePropertyToValue.get(PAGE_TITLE_NODE), true);
@@ -123,7 +112,7 @@ public class HarvardSingleNewsPageCreatorImpl implements HarvardSingleNewsPageCr
     private void translateValues(Page page, Map<String, String> pagePropertyToValue) throws TranslationException {
         TranslationService translationService = translationManager.createTranslationService(page.getContentResource());
         for (Map.Entry<String, String> entry : pagePropertyToValue.entrySet()) {
-            if (!entry.getKey().equals("tag") && !entry.getKey().equals(HarvardNewsParserImpl.IMAGE_PATH)) {
+            if (!entry.getKey().equals("tag") && !entry.getKey().equals(HarvardNewsParserImpl.IMAGE_PATH) && !entry.getKey().equals(HarvardNewsParserImpl.TEXT_PATH_IS_REACH_PROPERTY)) {
                 String translatedString = translationService
                         .translateString(entry.getValue(), SOURCE_LANGUAGE, TARGET_LANGUAGE, TranslationConstants.ContentType.HTML, null)
                         .getTranslation();
@@ -131,11 +120,6 @@ public class HarvardSingleNewsPageCreatorImpl implements HarvardSingleNewsPageCr
             }
         }
     }
-
-    /**
-     * check already exists news in repo by Id and delete them from Map
-     * @param newsIdToLink - pairs news Id and news link
-     */
 
     @Override
     public void deleteNewsDuplicates(Map<String, String> newsIdToLink) {
