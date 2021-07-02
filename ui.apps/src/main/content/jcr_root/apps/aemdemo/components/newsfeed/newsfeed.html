@@ -1,0 +1,13 @@
+<div data-sly-use.newsfeed="com.exadel.kaliada.core.models.NewsFeedModel"
+     data-sly-use.newstemplate="newstemplate.html"
+     class="cmp-newsfeed">
+    <div id="newsfeed" data-sly-list.item="${newsfeed.news}">
+        <br>
+        <div data-sly-call="${newstemplate.newsTemplate @ news=item}"></div>
+        <br>
+    </div>
+    <button id="show-more">Show more</button>
+    <br>
+    <br>
+    <span id="offset" hidden="">${newsfeed.offset}</span>
+</div>
