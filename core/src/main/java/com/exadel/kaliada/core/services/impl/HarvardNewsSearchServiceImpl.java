@@ -8,10 +8,8 @@ import com.exadel.kaliada.core.services.HarvardNewsSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.jsoup.Jsoup;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
@@ -45,9 +43,6 @@ public class HarvardNewsSearchServiceImpl implements HarvardNewsSearchService {
     private static final String EXTENSION = ".html";
     private static final String TAG_URL_PARAMETER = "?tag=";
     private static final String URI_HARVARD_NEWS = "/content/aemdemo/en/harvard-news.html";
-
-    @Reference
-    private ResourceResolverFactory resourceResolverFactory;
 
     @Override
     public List<NewsModel> getAllNews(SlingHttpServletRequest request, int offset, int limit, String tagName, String locale) {
@@ -84,6 +79,16 @@ public class HarvardNewsSearchServiceImpl implements HarvardNewsSearchService {
         return Collections.emptyList();
     }
 
+    /**
+     *
+     * @param request SlingHttpServletRequest
+     * @param tagName tag name to search news by tag
+     * @param locale locale name to search news by locale
+     * @param offset how many news need to skip
+     * @param limit how many news need to show
+     * @return return query based on incoming parameters
+     * @throws RepositoryException
+     */
     private Query getQuery(SlingHttpServletRequest request, String tagName, String locale, int offset, int limit) throws RepositoryException {
         ResourceResolver resourceResolver = request.getResourceResolver();
         Session session = resourceResolver.adaptTo(Session.class);
@@ -97,6 +102,12 @@ public class HarvardNewsSearchServiceImpl implements HarvardNewsSearchService {
         return query;
     }
 
+    /**
+     *
+     * @param countWords count words in summary article
+     * @param article whole article
+     * @return summary article
+     */
     private String getSummaryArticle(int countWords, String article) {
         int index = 0;
         while (countWords != 0) {
