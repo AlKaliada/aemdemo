@@ -1,0 +1,44 @@
+.cmp-news {
+    height: 300px;
+}
+
+.cmp-news .cmp-news__image {
+    float: left;
+}
+.cmp-news .cmp-news__image {
+    width: 300px;
+    height: 300px;
+    border-radius: 30px;
+    object-fit: cover;
+}
+.cmp-news .cmp-news__title {
+    font-size: medium;
+    font-family: serif;
+    padding-top: 0.5rem;
+    margin-left: 320px;
+    margin-bottom: 0.25rem;
+    margin-top: 0rem;
+}
+.cmp-news .cmp-news__tags {
+    color: grey;
+    font-size: x-small;
+    margin-left: 320px;
+    text-transform: uppercase;
+}
+
+.cmp-news .cmp-news__text {
+    margin-left: 320px;
+}
+
+.cmp-news .cmp-news__image-like {
+    width: 30px;
+    height: 30px;
+    background-size: cover;
+    border: none;
+    border-radius: 60%;
+    display: inline;
+}
+
+.cmp-news .cmp-news__like {
+    margin-left: 320px;
+}

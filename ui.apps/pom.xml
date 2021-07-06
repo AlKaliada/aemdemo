@@ -97,9 +97,9 @@
                 <executions>
                     <execution>
                         <id>validate-htl-scripts</id>
-                        <goals>
-                            <goal>validate</goal>
-                        </goals>
+<!--                        <goals>-->
+<!--                            <goal>validate</goal>-->
+<!--                        </goals>-->
                         <phase>generate-sources</phase>
                         <configuration>
                             <generateJavaClasses>true</generateJavaClasses>

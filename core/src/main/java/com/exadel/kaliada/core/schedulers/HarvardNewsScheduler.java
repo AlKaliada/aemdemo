@@ -2,7 +2,6 @@ package com.exadel.kaliada.core.schedulers;
 
 import com.exadel.kaliada.core.services.HarvardNewsParser;
 import com.exadel.kaliada.core.services.HarvardSingleNewsPageCreator;
-import com.exadel.kaliada.core.services.impl.HarvardNewsParserImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;

@@ -6,7 +6,7 @@ likeButton.onclick = function() {
     if (isLikeClicked) {
         isLikeClicked = false;
         likeButton.classList.remove('like_clicked')
-        $.ajax({
+        jQuery.ajax({
             url : '/bin/like',
             method : 'POST',
             data: {'likeCounter':'decrement', 'url':document.documentURI},
@@ -19,7 +19,7 @@ likeButton.onclick = function() {
         if (isDislikeClicked){
             isDislikeClicked = false;
             dislikeButton.classList.remove('dislike_clicked')
-            $.ajax({
+            jQuery.ajax({
                 url : '/bin/like',
                 method : 'POST',
                 data: {'dislikeCounter':'decrement', 'url':document.documentURI},
@@ -31,7 +31,7 @@ likeButton.onclick = function() {
         }
         likeButton.classList.add('like_clicked');
         isLikeClicked = true;
-        $.ajax({
+        jQuery.ajax({
             url : '/bin/like',
             method : 'POST',
             data: {'likeCounter':'increment', 'url':document.documentURI},
@@ -46,7 +46,7 @@ dislikeButton.onclick = function () {
     if (isDislikeClicked) {
         isDislikeClicked = false;
         dislikeButton.classList.remove('dislike_clicked')
-        $.ajax({
+        jQuery.ajax({
             url : '/bin/like',
             method : 'POST',
             data: {'dislikeCounter':'decrement', 'url':document.documentURI},
@@ -59,7 +59,7 @@ dislikeButton.onclick = function () {
         if (isLikeClicked){
             isLikeClicked = false;
             likeButton.classList.remove('like_clicked')
-            $.ajax({
+            jQuery.ajax({
                 url : '/bin/like',
                 method : 'POST',
                 data: {'likeCounter':'decrement', 'url':document.documentURI},
@@ -71,7 +71,7 @@ dislikeButton.onclick = function () {
         }
         dislikeButton.classList.add('dislike_clicked');
         isDislikeClicked = true;
-        $.ajax({
+        jQuery.ajax({
             url : '/bin/like',
             method : 'POST',
             data: {'dislikeCounter':'increment', 'url':document.documentURI},

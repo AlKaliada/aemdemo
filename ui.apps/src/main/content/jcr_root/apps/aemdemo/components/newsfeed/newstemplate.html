@@ -1,0 +1,10 @@
+<div data-sly-template.newsTemplate="${@ news}">
+    <div class="cmp-news">
+        <div><img  alt="" class="cmp-news__image" src="${news.image}"></div>
+        <h2 class="cmp-news__title"><a href="${news.reference}">${news.title} </a></h2>
+        <p class="cmp-news__tags">#${news.tags @ join=' '}</p>
+        <p class="cmp-news__text">${news.text}</p>
+        <div class="cmp-news__like"><img alt="" class="cmp-news__image-like" src="/content/dam/aemdemo/like.jpg">${news.likes}<img alt="" class="cmp-news__image-like" src="/content/dam/aemdemo/dislike.jpg">${news.dislikes} </div>
+    </div>
+    <br>
+</div>
