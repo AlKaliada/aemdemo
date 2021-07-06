@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Class to search info from harvard news pages
+ * Searching info from harvard news pages
  */
 
 public interface HarvardNewsSearchService {

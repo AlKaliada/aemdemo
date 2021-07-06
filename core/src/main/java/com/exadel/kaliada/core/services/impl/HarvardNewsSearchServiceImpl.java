@@ -7,17 +7,18 @@ import com.exadel.kaliada.core.models.NewsModel;
 import com.exadel.kaliada.core.services.HarvardNewsSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.models.factory.ModelFactory;
 import org.jsoup.Jsoup;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.query.Query;
-import javax.jcr.query.QueryManager;
-import javax.jcr.query.QueryResult;
+import javax.jcr.query.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -44,32 +45,31 @@ public class HarvardNewsSearchServiceImpl implements HarvardNewsSearchService {
     private static final String TAG_URL_PARAMETER = "?tag=";
     private static final String URI_HARVARD_NEWS = "/content/aemdemo/en/harvard-news.html";
 
+    @Reference
+    private ModelFactory modelFactory;
+
     @Override
     public List<NewsModel> getAllNews(SlingHttpServletRequest request, int offset, int limit, String tagName, String locale) {
         try {
+            ResourceResolver resourceResolver = request.getResourceResolver();
             List<NewsModel> news = new ArrayList<>();
             Query query = getQuery(request, tagName, locale, offset, limit);
             QueryResult queryResult = query.execute();
             NodeIterator nodeIterator = queryResult.getNodes();
             while (nodeIterator.hasNext()) {
                 Node node = nodeIterator.nextNode();
-                NewsModel newsModel = new NewsModel();
-                newsModel.setReference(node.getParent().getPath() + EXTENSION);
-                Node titleNode = node.getNode(TITLE_NODE);
-                newsModel.setTitle(titleNode.getProperty(TITLE_PROPERTY).getValue().getString());
-                newsModel.setTags(Arrays.stream(node.getProperty(TAG_PROPERTY).getValues())
-                        .map(Object::toString)
+                Resource resource = resourceResolver.getResource(node.getPath());
+                NewsModel newsModel = modelFactory.getModelFromWrappedRequest(request, resource, NewsModel.class);
+                newsModel.setReference(resource.getParent().getPath() + EXTENSION);
+                newsModel.setTitle(resource.getChild(TITLE_NODE).getValueMap().get(TITLE_PROPERTY, String.class));
+                newsModel.setTags(Arrays.stream(resource.getValueMap().get(TAG_PROPERTY, new String[0]))
                         .map(tag->tag.replace(TAG_NAME_SPACE, ""))
                         .collect(Collectors.toList()));
-                Node imageNode = node.getNode(IMAGE_NODE);
-                newsModel.setImage(imageNode.getProperty(IMAGE_PROPERTY).getValue().getString());
-                Node textNode = node.getNode(TEXT_NODE);
-                newsModel.setText(getSummaryArticle(COUNT_WORDS_SUMMARY_ARTICLE, Jsoup.parse(textNode.getProperty(TEXT_PROPERTY).getValue().getString()).text()));
-                Node likeNode = node.getNode(LIKE_NODE);
-                long likes = likeNode.hasProperty(LIKE_PROPERTY) ? likeNode.getProperty(LIKE_PROPERTY).getValue().getLong() : 0;
-                long dislikes = likeNode.hasProperty(DISLIKE_PROPERTY) ? likeNode.getProperty(DISLIKE_PROPERTY).getValue().getLong() : 0;
-                newsModel.setLikes(likes);
-                newsModel.setDislikes(dislikes);
+                newsModel.setImage(resource.getChild(IMAGE_NODE).getValueMap().get(IMAGE_PROPERTY, String.class));
+                newsModel.setText(getSummaryArticle(COUNT_WORDS_SUMMARY_ARTICLE, Jsoup.parse(resource.getChild(TEXT_NODE).getValueMap().get(TEXT_PROPERTY, "")).text()));
+                Resource likeResource = resource.getChild(LIKE_NODE);
+                newsModel.setLikes(likeResource.getValueMap().get(LIKE_PROPERTY, 0));
+                newsModel.setDislikes(likeResource.getValueMap().get(DISLIKE_PROPERTY, 0));
                 news.add(newsModel);
             }
             return news;

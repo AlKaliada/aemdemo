@@ -30,15 +30,21 @@ public class NewsFeedModel {
     @Default(intValues = 10)
     private int limit;
 
+    @ValueMapValue
     private int offset;
 
+    @ValueMapValue
+    private String tag;
+
+    @ValueMapValue
+    private String locale;
+
+    @ValueMapValue
     private List<NewsModel> news;
 
     public List<NewsModel> getNews() {
-        String tag = request.getParameter("tag");
-        String locale = request.getRequestURI().contains("/ru/") ? "ru" : "en";
         news = harvardNewsSearchService.getAllNews(request, offset, limit, tag, locale);
-        offset += limit;
+        offset += limit; // перенести на фронт
         return news;
     }
 
@@ -48,5 +54,7 @@ public class NewsFeedModel {
         if (offsetParameter != null) {
             offset = Integer.parseInt(offsetParameter);
         }
+        tag = request.getParameter("tag");
+        locale = request.getRequestURI().contains("/ru/") ? "ru" : "en";
     }
 }
