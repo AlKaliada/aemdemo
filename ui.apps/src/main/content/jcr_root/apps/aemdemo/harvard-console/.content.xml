@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="granite/ui/components/shell/page">
+        <title
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/text"
+            text="Harvard news configuration"/>
+        <content
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/container">
+            <items jcr:primaryType="nt:unstructured">
+                <form
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form"
+                    action="harvard-console/update-news"
+                    foundationForm="{Boolean}true"
+                    margin="{Boolean}true"
+                    method="POST">
+                    <items jcr:primaryType="nt:unstructured">
+                        <button
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            icon="refresh"
+                            text="Update news"
+                            type="submit"/>
+                    </items>
+                </form>
+            </items>
+        </content>
+    </jcr:content>
+    <update-news
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="aemdemo/harvard-console"/>
+</jcr:root>

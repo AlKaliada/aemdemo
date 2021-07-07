@@ -79,9 +79,6 @@ public class LikeComponentServlet extends SlingAllMethodsServlet {
         resource = resourceResolver.getResource(secondPageResource);
         changeLikes(resource, req);
         resourceResolver.commit();
-        log.info("++++++++++++++++++++++++++++++++++++++++++");
-        log.info(String.valueOf(likes));
-        log.info("++++++++++++++++++++++++++++++++++++++++++");
         resp.setContentType("text/html");
         resp.getWriter().write(String.valueOf(likes));
     }

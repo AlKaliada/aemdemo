@@ -2,6 +2,7 @@ package com.exadel.kaliada.core.schedulers;
 
 import com.exadel.kaliada.core.services.HarvardNewsParser;
 import com.exadel.kaliada.core.services.HarvardSingleNewsPageCreator;
+import com.exadel.kaliada.core.utils.HarvardNewsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;
@@ -61,11 +62,6 @@ public class HarvardNewsScheduler implements Runnable{
 
     @Override
     public void run() {
-        Map<String, String> news = harvardNewsParser.getAllNews();
-        harvardSingleNewsPageCreator.deleteNewsDuplicates(news);
-        for (Map.Entry<String, String> entry : news.entrySet()) {
-            Map<String, String> resourceToValue = harvardNewsParser.parseSingleNews(entry.getValue());
-            harvardSingleNewsPageCreator.createPage(entry.getKey(), resourceToValue);
-        }
+        HarvardNewsUtil.updateNews(harvardNewsParser, harvardSingleNewsPageCreator);
     }
 }
