@@ -59,21 +59,38 @@ public class HarvardNewsSearchServiceImpl implements HarvardNewsSearchService {
             while (nodeIterator.hasNext()) {
                 Node node = nodeIterator.nextNode();
                 Resource resource = resourceResolver.getResource(node.getPath());
-                NewsModel newsModel = modelFactory.getModelFromWrappedRequest(request, resource, NewsModel.class);
-                newsModel.setReference(resource.getParent().getPath() + EXTENSION);
-                newsModel.setTitle(resource.getChild(TITLE_NODE).getValueMap().get(TITLE_PROPERTY, String.class));
+                if (resource == null) {
+                    return news;
+                }
+                NewsModel newsModel = modelFactory.createModel(resource, NewsModel.class);
+                newsModel.setReference(Optional.ofNullable(resource.getParent())
+                        .map(res -> res.getPath() + EXTENSION)
+                        .orElse(null));
+                newsModel.setTitle(Optional.ofNullable(resource.getChild(TITLE_NODE))
+                        .map(Resource::getValueMap)
+                        .map(valueMap -> valueMap.get(TITLE_PROPERTY, String.class))
+                        .orElse(null));
                 newsModel.setTags(Arrays.stream(resource.getValueMap().get(TAG_PROPERTY, new String[0]))
                         .map(tag->tag.replace(TAG_NAME_SPACE, ""))
                         .collect(Collectors.toList()));
-                newsModel.setImage(resource.getChild(IMAGE_NODE).getValueMap().get(IMAGE_PROPERTY, String.class));
+                newsModel.setImage(Optional.ofNullable(resource.getChild(IMAGE_NODE))
+                        .map(Resource::getValueMap)
+                        .map(valueMap -> valueMap.get(IMAGE_PROPERTY, String.class))
+                        .orElse(null));
                 newsModel.setText(getSummaryArticle(COUNT_WORDS_SUMMARY_ARTICLE, Jsoup.parse(resource.getChild(TEXT_NODE).getValueMap().get(TEXT_PROPERTY, "")).text()));
                 Resource likeResource = resource.getChild(LIKE_NODE);
-                newsModel.setLikes(likeResource.getValueMap().get(LIKE_PROPERTY, 0));
-                newsModel.setDislikes(likeResource.getValueMap().get(DISLIKE_PROPERTY, 0));
+                newsModel.setLikes(Optional.ofNullable(likeResource)
+                        .map(Resource::getValueMap)
+                        .map(valueMap -> valueMap.get(LIKE_PROPERTY, 0))
+                        .orElse(0));
+                newsModel.setDislikes(Optional.ofNullable(likeResource)
+                        .map(Resource::getValueMap)
+                        .map(valueMap -> valueMap.get(DISLIKE_PROPERTY, 0))
+                        .orElse(0));
                 news.add(newsModel);
             }
             return news;
-        } catch (RepositoryException e) {
+        } catch (RepositoryException | NoSuchElementException e) {
             log.error("cannot get news", e);
         }
         return Collections.emptyList();
@@ -92,6 +109,9 @@ public class HarvardNewsSearchServiceImpl implements HarvardNewsSearchService {
     private Query getQuery(SlingHttpServletRequest request, String tagName, String locale, int offset, int limit) throws RepositoryException {
         ResourceResolver resourceResolver = request.getResourceResolver();
         Session session = resourceResolver.adaptTo(Session.class);
+        if (session == null) {
+            throw new NoSuchElementException("cannot get session");
+        }
         QueryManager queryManager = session.getWorkspace().getQueryManager();
         String newQuery = tagName == null || tagName.length() == 0
                 ? BASE_QUERY.replace(LOCALE_NAME_IN_BASE_QUERY, locale)
@@ -124,7 +144,12 @@ public class HarvardNewsSearchServiceImpl implements HarvardNewsSearchService {
     public Map<String, String> getAllTags(SlingHttpServletRequest request) {
         ResourceResolver resourceResolver = request.getResourceResolver();
         PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-        Page rootPage = pageManager.getPage(ROOT_PAGE);
+        Page rootPage = Optional.ofNullable(pageManager)
+                .map(pManager -> pManager.getPage(ROOT_PAGE))
+                .orElse(null);
+        if (rootPage == null) {
+            return Collections.emptyMap();
+        }
         String domainName = request.getRequestPathInfo().getResourcePath().substring(0, request.getRequestPathInfo().getResourcePath().indexOf("/"));
         Map<String, String> tagToLink = new TreeMap<>();
         rootPage.listChildren().forEachRemaining(page -> tagToLink.putAll(Arrays.stream(page.getTags())

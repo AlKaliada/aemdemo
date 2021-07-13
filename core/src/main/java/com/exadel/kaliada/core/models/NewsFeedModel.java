@@ -44,7 +44,7 @@ public class NewsFeedModel {
 
     public List<NewsModel> getNews() {
         news = harvardNewsSearchService.getAllNews(request, offset, limit, tag, locale);
-        offset += limit; // перенести на фронт
+        offset += limit; // TODO transfer to UI
         return news;
     }
 

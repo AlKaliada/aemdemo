@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,20 +39,40 @@ class HarvardNewsSearchServiceImplTest {
         Page page = aemContext.create().page("/content/aemdemo/en");
 
         Page pageChild1 = aemContext.create().page("/content/aemdemo/en/child1", "/conf/aemdemo/settings/wcm/templates/harvard-single-news-page");
-
         Page pageChild2 = aemContext.create().page("/content/aemdemo/en/child2", "/conf/aemdemo/settings/wcm/templates/harvard-single-news-page");
+        Map<String, Object> propertiesChild1 = new HashMap<>();
+        propertiesChild1.put("jcr:title", "Child1");
+        propertiesChild1.put("fileReference", "child1 image");
+        propertiesChild1.put("likeCounter", 2);
+        propertiesChild1.put("dislikeCounter", 1);
+        propertiesChild1.put("text", "<p>text text text</p>");
+        aemContext.create().resource(pageChild1, "root/container/title", propertiesChild1);
+        aemContext.create().resource(pageChild1, "root/container/text", propertiesChild1);
+        aemContext.create().resource(pageChild1, "root/container/like", propertiesChild1);
+        aemContext.create(). resource(pageChild1, "root/container/image", propertiesChild1);
+
         MockTagManager tagManager = (MockTagManager) aemContext.resourceResolver().adaptTo(TagManager.class);
         Tag[] tag1 = {aemContext.create().tag("harvard-news:tag1")};
         Tag[] tag2 = {aemContext.create().tag("harvard-news:tag2")};
-        tagManager.setTags(pageChild1.getContentResource(), tag1);
-        tagManager.setTags(pageChild2.getContentResource(), tag2);
-
+        if (tagManager != null) {
+            tagManager.setTags(pageChild1.getContentResource(), tag1);
+            tagManager.setTags(pageChild2.getContentResource(), tag2);
+        }
     }
 
     @Test
     void getAllNews() {
-
         List<NewsModel> allNews = harvardNewsSearchService.getAllNews(request, 0, 2, "tag1", "en");
+
+        assertAll(
+                () -> assertEquals(1, allNews.size()),
+                () -> assertEquals("text text ", allNews.get(0).getText()),
+                () -> assertEquals("Child1", allNews.get(0).getTitle()),
+                () -> assertEquals("child1 image", allNews.get(0).getImage()),
+                () -> assertEquals(2, allNews.get(0).getLikes()),
+                () -> assertEquals(1, allNews.get(0).getDislikes()),
+                () -> assertEquals(List.of("tag1"), allNews.get(0).getTags())
+        );
     }
 
     @Test
