@@ -4,6 +4,7 @@ import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -17,21 +18,36 @@ class LikeComponentServletTest {
 
     private AemContext aemContext = new AemContext();
     private LikeComponentServlet likeComponentServlet = new LikeComponentServlet();
+    private MockSlingHttpServletRequest request;
+    private MockSlingHttpServletResponse response;
+
+    @BeforeEach
+    private void setUp() {
+        request = aemContext.request();
+        response = aemContext.response();
+        aemContext.load().json("/child1page.json", "/content/aemdemo/en/post-328695");
+        aemContext.load().json("/child1page.json", "/content/aemdemo/ru/post-328695");
+    }
 
     @Test
-    void doPost() throws ServletException, IOException {
-        aemContext.build().resource("/content/aemdemo/en/post-328695/jcr:content/root/container/like");
-        aemContext.build().resource("/content/aemdemo/ru/post-328695/jcr:content/root/container/like");
+    public void doPostEnLocale() throws ServletException, IOException {
 
-        MockSlingHttpServletRequest request = aemContext.request();
-        MockSlingHttpServletResponse response = aemContext.response();
         request.addRequestParameter("url", "/content/aemdemo/en/post-328695.html");
         request.addRequestParameter("likeCounter", "increment");
 
         likeComponentServlet.doPost(request, response);
 
-        assertEquals("/content/aemdemo/en/post-328695.html", request.getParameter("url"));
-        assertEquals("increment", request.getParameter("likeCounter"));
-        assertEquals("1", response.getOutputAsString());
+        assertEquals("3", response.getOutputAsString());
+    }
+
+    @Test
+    public void doPostRuLocale() throws ServletException, IOException {
+
+        request.addRequestParameter("url", "/content/aemdemo/ru/post-328695.html");
+        request.addRequestParameter("dislikeCounter", "decrement");
+
+        likeComponentServlet.doPost(request, response);
+
+        assertEquals("0", response.getOutputAsString());
     }
 }

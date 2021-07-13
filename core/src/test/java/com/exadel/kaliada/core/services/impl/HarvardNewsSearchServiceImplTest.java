@@ -50,7 +50,7 @@ class HarvardNewsSearchServiceImplTest {
     }
 
     @Test
-    void getAllNews() {
+    public void getAllNews() {
         List<NewsModel> allNews = harvardNewsSearchService.getAllNews(request, 0, 2, "tag1", "en");
 
         assertAll(
