@@ -1,0 +1,26 @@
+{
+  "jcr:primaryType": "cq:Page",
+  "jcr:content": {
+    "jcr:primaryType": "cq:PageContent",
+    "cq:template": "/conf/aemdemo/settings/wcm/templates/harvard-single-news-page",
+    "cq:tags": ["harvard-news:tag2"],
+    "root": {
+      "jcr:primaryType": "nt:unstructured",
+      "container": {
+        "image": {
+          "fileReference": "child2 image"
+        },
+        "title": {
+          "jcr:title": "Child2"
+        },
+        "text": {
+          "text": "<p>word word word</p>"
+        },
+        "like":{
+          "likeCounter": 3,
+          "dislikeCounter": 4
+        }
+      }
+    }
+  }
+}

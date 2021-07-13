@@ -12,15 +12,12 @@ import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 import com.exadel.kaliada.core.utils.ResourceResolverUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.*;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import java.util.NoSuchElementException;
-import java.util.Optional;
-
-@Slf4j
 @Component(
         service = WorkflowProcess.class,
         immediate = true,
@@ -29,6 +26,7 @@ import java.util.Optional;
                 Constants.SERVICE_VENDOR + " = aem demo",
                 Constants.SERVICE_DESCRIPTION + " = Custom harvard news translator step from en to ru"
         })
+@Slf4j
 public class HarvardTranslatorWorkflowProcess implements WorkflowProcess {
 
     private static final String PAYLOAD_TYPE = "JCR_PATH";
@@ -52,17 +50,21 @@ public class HarvardTranslatorWorkflowProcess implements WorkflowProcess {
             if (workflowData.getPayloadType().equals(PAYLOAD_TYPE)) {
                 ResourceResolver resourceResolver = ResourceResolverUtil.getResourceResolver(resourceResolverFactory);
                 String payload = workflowData.getPayload().toString() + NODE_TO_TRANSLATE_PATH;
-                Resource resource = Optional.ofNullable(resourceResolver.getResource(payload)).orElseThrow();
-                ModifiableValueMap valueMap = Optional.ofNullable(resource.adaptTo(ModifiableValueMap.class)).orElseThrow();
-                String text = valueMap.get(PROPERTY_TO_TRANSLATE, "");
+                Resource resource = resourceResolver.getResource(payload);
+                ModifiableValueMap valueMap = resource.adaptTo(ModifiableValueMap.class);
+                String text = valueMap.get(PROPERTY_TO_TRANSLATE, StringUtils.EMPTY);
                 String translatedText = translateText(resource, text);
-                Resource differentLocaleResource = Optional.ofNullable(resourceResolver.getResource(payload.replace(SOURCE_LOCALE, TARGET_LOCALE))).orElseThrow();
-                valueMap = Optional.ofNullable(differentLocaleResource.adaptTo(ModifiableValueMap.class)).orElseThrow();
+                Resource differentLocaleResource = resourceResolver.getResource(payload.replace(SOURCE_LOCALE, TARGET_LOCALE));
+                valueMap = differentLocaleResource.adaptTo(ModifiableValueMap.class);
                 valueMap.put(PROPERTY_TO_TRANSLATE, translatedText);
                 resourceResolver.commit();
             }
-        } catch (PersistenceException | LoginException | TranslationException | NoSuchElementException e) {
-            log.error("Can't execute Harvard Translator Workflow Process", e);
+        } catch (PersistenceException | LoginException e) {
+            log.error("Can't execute Harvard Translator Workflow Process, please check that user has sufficient rights", e);
+        } catch (TranslationException e) {
+            log.error("Can't execute Harvard Translator Workflow Process, please check translation engine", e);
+        } catch (NullPointerException e) {
+            log.error("Can't execute Harvard Translator Workflow Process, some resource not available", e);
         }
     }
 

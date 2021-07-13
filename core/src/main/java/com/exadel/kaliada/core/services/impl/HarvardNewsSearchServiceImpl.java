@@ -6,6 +6,7 @@ import com.day.cq.wcm.api.PageManager;
 import com.exadel.kaliada.core.models.NewsModel;
 import com.exadel.kaliada.core.services.HarvardNewsSearchService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -50,9 +51,9 @@ public class HarvardNewsSearchServiceImpl implements HarvardNewsSearchService {
 
     @Override
     public List<NewsModel> getAllNews(SlingHttpServletRequest request, int offset, int limit, String tagName, String locale) {
+        List<NewsModel> news = new ArrayList<>();
         try {
             ResourceResolver resourceResolver = request.getResourceResolver();
-            List<NewsModel> news = new ArrayList<>();
             Query query = getQuery(request, tagName, locale, offset, limit);
             QueryResult queryResult = query.execute();
             NodeIterator nodeIterator = queryResult.getNodes();
@@ -60,40 +61,34 @@ public class HarvardNewsSearchServiceImpl implements HarvardNewsSearchService {
                 Node node = nodeIterator.nextNode();
                 Resource resource = resourceResolver.getResource(node.getPath());
                 if (resource == null) {
-                    return news;
+                    continue;
                 }
                 NewsModel newsModel = modelFactory.createModel(resource, NewsModel.class);
                 newsModel.setReference(Optional.ofNullable(resource.getParent())
                         .map(res -> res.getPath() + EXTENSION)
                         .orElse(null));
-                newsModel.setTitle(Optional.ofNullable(resource.getChild(TITLE_NODE))
-                        .map(Resource::getValueMap)
-                        .map(valueMap -> valueMap.get(TITLE_PROPERTY, String.class))
-                        .orElse(null));
+                newsModel.setTitle(extractPropertyFromChildResource(resource, TITLE_NODE, TITLE_PROPERTY, String.class));
                 newsModel.setTags(Arrays.stream(resource.getValueMap().get(TAG_PROPERTY, new String[0]))
-                        .map(tag->tag.replace(TAG_NAME_SPACE, ""))
+                        .map(tag->tag.replace(TAG_NAME_SPACE, StringUtils.EMPTY))
                         .collect(Collectors.toList()));
-                newsModel.setImage(Optional.ofNullable(resource.getChild(IMAGE_NODE))
-                        .map(Resource::getValueMap)
-                        .map(valueMap -> valueMap.get(IMAGE_PROPERTY, String.class))
-                        .orElse(null));
-                newsModel.setText(getSummaryArticle(COUNT_WORDS_SUMMARY_ARTICLE, Jsoup.parse(resource.getChild(TEXT_NODE).getValueMap().get(TEXT_PROPERTY, "")).text()));
-                Resource likeResource = resource.getChild(LIKE_NODE);
-                newsModel.setLikes(Optional.ofNullable(likeResource)
-                        .map(Resource::getValueMap)
-                        .map(valueMap -> valueMap.get(LIKE_PROPERTY, 0))
-                        .orElse(0));
-                newsModel.setDislikes(Optional.ofNullable(likeResource)
-                        .map(Resource::getValueMap)
-                        .map(valueMap -> valueMap.get(DISLIKE_PROPERTY, 0))
-                        .orElse(0));
+                newsModel.setImage(extractPropertyFromChildResource(resource, IMAGE_NODE, IMAGE_PROPERTY, String.class));
+                newsModel.setText(getSummaryArticle(COUNT_WORDS_SUMMARY_ARTICLE, Jsoup.parse(extractPropertyFromChildResource(resource, TEXT_NODE, TEXT_PROPERTY, String.class)).text()));
+                newsModel.setLikes(extractPropertyFromChildResource(resource, LIKE_NODE, LIKE_PROPERTY, Long.class));
+                newsModel.setDislikes(extractPropertyFromChildResource(resource, LIKE_NODE, DISLIKE_PROPERTY, Long.class));
                 news.add(newsModel);
             }
             return news;
-        } catch (RepositoryException | NoSuchElementException e) {
+        } catch (RepositoryException e) {
             log.error("cannot get news", e);
         }
-        return Collections.emptyList();
+        return news;
+    }
+
+    private <T> T extractPropertyFromChildResource(Resource resource, String childName, String propertyName, Class<T> returnType) {
+        return Optional.ofNullable(resource.getChild(childName))
+                .map(Resource::getValueMap)
+                .map(valueMap -> valueMap.get(propertyName, returnType))
+                .orElse(null);
     }
 
     /**
