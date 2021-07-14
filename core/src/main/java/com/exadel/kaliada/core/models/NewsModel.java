@@ -3,16 +3,16 @@ package com.exadel.kaliada.core.models;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
-import javax.inject.Named;
 import java.util.List;
 
 @Getter
 @Setter
-@Model(adaptables = SlingHttpServletRequest.class,
+@Model(adaptables = {SlingHttpServletRequest.class, Resource.class},
         defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class NewsModel {
 

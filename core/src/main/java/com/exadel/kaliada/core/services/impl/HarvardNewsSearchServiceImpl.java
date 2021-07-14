@@ -6,6 +6,7 @@ import com.day.cq.wcm.api.PageManager;
 import com.exadel.kaliada.core.models.NewsModel;
 import com.exadel.kaliada.core.services.HarvardNewsSearchService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -50,33 +51,44 @@ public class HarvardNewsSearchServiceImpl implements HarvardNewsSearchService {
 
     @Override
     public List<NewsModel> getAllNews(SlingHttpServletRequest request, int offset, int limit, String tagName, String locale) {
+        List<NewsModel> news = new ArrayList<>();
         try {
             ResourceResolver resourceResolver = request.getResourceResolver();
-            List<NewsModel> news = new ArrayList<>();
             Query query = getQuery(request, tagName, locale, offset, limit);
             QueryResult queryResult = query.execute();
             NodeIterator nodeIterator = queryResult.getNodes();
             while (nodeIterator.hasNext()) {
                 Node node = nodeIterator.nextNode();
                 Resource resource = resourceResolver.getResource(node.getPath());
-                NewsModel newsModel = modelFactory.getModelFromWrappedRequest(request, resource, NewsModel.class);
-                newsModel.setReference(resource.getParent().getPath() + EXTENSION);
-                newsModel.setTitle(resource.getChild(TITLE_NODE).getValueMap().get(TITLE_PROPERTY, String.class));
+                if (resource == null) {
+                    continue;
+                }
+                NewsModel newsModel = modelFactory.createModel(resource, NewsModel.class);
+                newsModel.setReference(Optional.ofNullable(resource.getParent())
+                        .map(res -> res.getPath() + EXTENSION)
+                        .orElse(null));
+                newsModel.setTitle(extractPropertyFromChildResource(resource, TITLE_NODE, TITLE_PROPERTY, String.class));
                 newsModel.setTags(Arrays.stream(resource.getValueMap().get(TAG_PROPERTY, new String[0]))
-                        .map(tag->tag.replace(TAG_NAME_SPACE, ""))
+                        .map(tag->tag.replace(TAG_NAME_SPACE, StringUtils.EMPTY))
                         .collect(Collectors.toList()));
-                newsModel.setImage(resource.getChild(IMAGE_NODE).getValueMap().get(IMAGE_PROPERTY, String.class));
-                newsModel.setText(getSummaryArticle(COUNT_WORDS_SUMMARY_ARTICLE, Jsoup.parse(resource.getChild(TEXT_NODE).getValueMap().get(TEXT_PROPERTY, "")).text()));
-                Resource likeResource = resource.getChild(LIKE_NODE);
-                newsModel.setLikes(likeResource.getValueMap().get(LIKE_PROPERTY, 0));
-                newsModel.setDislikes(likeResource.getValueMap().get(DISLIKE_PROPERTY, 0));
+                newsModel.setImage(extractPropertyFromChildResource(resource, IMAGE_NODE, IMAGE_PROPERTY, String.class));
+                newsModel.setText(getSummaryArticle(COUNT_WORDS_SUMMARY_ARTICLE, Jsoup.parse(extractPropertyFromChildResource(resource, TEXT_NODE, TEXT_PROPERTY, String.class)).text()));
+                newsModel.setLikes(extractPropertyFromChildResource(resource, LIKE_NODE, LIKE_PROPERTY, Long.class));
+                newsModel.setDislikes(extractPropertyFromChildResource(resource, LIKE_NODE, DISLIKE_PROPERTY, Long.class));
                 news.add(newsModel);
             }
             return news;
         } catch (RepositoryException e) {
             log.error("cannot get news", e);
         }
-        return Collections.emptyList();
+        return news;
+    }
+
+    private <T> T extractPropertyFromChildResource(Resource resource, String childName, String propertyName, Class<T> returnType) {
+        return Optional.ofNullable(resource.getChild(childName))
+                .map(Resource::getValueMap)
+                .map(valueMap -> valueMap.get(propertyName, returnType))
+                .orElse(null);
     }
 
     /**
@@ -92,6 +104,9 @@ public class HarvardNewsSearchServiceImpl implements HarvardNewsSearchService {
     private Query getQuery(SlingHttpServletRequest request, String tagName, String locale, int offset, int limit) throws RepositoryException {
         ResourceResolver resourceResolver = request.getResourceResolver();
         Session session = resourceResolver.adaptTo(Session.class);
+        if (session == null) {
+            throw new NoSuchElementException("cannot get session");
+        }
         QueryManager queryManager = session.getWorkspace().getQueryManager();
         String newQuery = tagName == null || tagName.length() == 0
                 ? BASE_QUERY.replace(LOCALE_NAME_IN_BASE_QUERY, locale)
@@ -124,7 +139,12 @@ public class HarvardNewsSearchServiceImpl implements HarvardNewsSearchService {
     public Map<String, String> getAllTags(SlingHttpServletRequest request) {
         ResourceResolver resourceResolver = request.getResourceResolver();
         PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-        Page rootPage = pageManager.getPage(ROOT_PAGE);
+        Page rootPage = Optional.ofNullable(pageManager)
+                .map(pManager -> pManager.getPage(ROOT_PAGE))
+                .orElse(null);
+        if (rootPage == null) {
+            return Collections.emptyMap();
+        }
         String domainName = request.getRequestPathInfo().getResourcePath().substring(0, request.getRequestPathInfo().getResourcePath().indexOf("/"));
         Map<String, String> tagToLink = new TreeMap<>();
         rootPage.listChildren().forEachRemaining(page -> tagToLink.putAll(Arrays.stream(page.getTags())
